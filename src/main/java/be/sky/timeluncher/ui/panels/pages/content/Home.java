@@ -3,8 +3,6 @@ package be.sky.timeluncher.ui.panels.pages.content;
 import be.sky.timeluncher.Launcher;
 import be.sky.timeluncher.game.MinecraftInfos;
 import be.sky.timeluncher.ui.PanelManager;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import fr.flowarg.flowupdater.FlowUpdater;
 import fr.flowarg.flowupdater.download.DownloadList;
 import fr.flowarg.flowupdater.download.IProgressCallback;
@@ -16,6 +14,8 @@ import fr.flowarg.flowupdater.utils.ModFileDeleter;
 import fr.flowarg.flowupdater.versions.AbstractForgeVersion;
 import fr.flowarg.flowupdater.versions.ForgeVersionBuilder;
 import fr.flowarg.flowupdater.versions.VanillaVersion;
+import fr.flowarg.materialdesignfontfx.MaterialDesignIcon;
+import fr.flowarg.materialdesignfontfx.MaterialDesignIconView;
 import fr.flowarg.openlauncherlib.NoFramework;
 import fr.theshark34.openlauncherlib.minecraft.GameFolder;
 import fr.theshark34.openlauncherlib.minecraft.GameInfos;
@@ -91,7 +91,7 @@ public class Home extends ContentPanel{
     private void showPlayButton() {
         boxPane.getChildren().clear();
         Button playBtn = new Button("Jouer");
-        FontAwesomeIconView playIcon = new FontAwesomeIconView(FontAwesomeIcon.GAMEPAD);
+        final var playIcon = new MaterialDesignIconView<>(MaterialDesignIcon.G.GAMEPAD);
         playIcon.getStyleClass().add("play-icon");
         setCanTakeAllSize(playBtn);
         setCenterH(playBtn);

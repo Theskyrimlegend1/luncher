@@ -8,8 +8,8 @@ plugins {
 
 apply plugin: 'org.openjfx.javafxplugin'
 
-group = 'be.sky'
-version = '1.0.0'
+group 'com.github.bricklou'
+version '1.0.0'
 
 repositories {
     mavenCentral()
@@ -17,46 +17,32 @@ repositories {
         url = 'https://litarvan.github.io/maven'
         name = 'LitarvanMaven'
     }
-    maven{
-        url = 'https://jitpack.io/'
+
+    maven {
+        url = 'https://jitpack.io'
         name = 'JitPack'
     }
 }
 
 dependencies {
+    implementation 'fr.litarvan:openauth:1.1.6'
+    implementation 'fr.flowarg:materialdesignfontfx:7.2.96-2'
 
-    implementation 'fr.litarvan:openauth:1.1.1'
-    implementation 'de.jensd:fontawesomefx-fontawesome:4+'
-
-    implementation 'fr.flowarg:flowupdater:1+'
-    implementation 'fr.flowarg:flowupdater-curseforgeplugin:2+'
-    implementation 'fr.flowarg:flowupdater-optifineplugin:2+'
-    implementation 'fr.flowarg:openlauncherlib:3+'
+    implementation 'fr.flowarg:flowupdater:1.8.+'
+    implementation 'fr.flowarg:openlauncherlib:3.2.6'
 
     implementation 'com.github.goxr3plus:FX-BorderlessScene:4+'
     implementation 'com.github.oshi:oshi-core:5+'
-
 }
 
-javafx{
-    version = 12
+javafx {
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 
-application{
-    getMainClass().set('be.sky.timeluncher.Main')
+application {
+    getMainClass().set('com.github.bricklou.launchertuto.Main')
 }
 
-compileJava{
+compileJava {
     options.encoding = "UTF-8"
-}
-
-jar{
-    manifest.attributes.put('Main-Class', 'be.sky.timeluncher.Main')
-
-    from{
-        configurations.compilClasspath.collect{
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
 }
