@@ -236,7 +236,7 @@ public class Home extends ContentPanel{
         EXTERNAL_FILES("Téléchargement des fichier externes..."),
         POST_EXECUTIONS("Exécution post-installation..."),
         INTEGRATION("Integration"),
-        END("Finit !");
+        END("Finit les amis!");
         String details;
 
         StepInfo(String details) {
