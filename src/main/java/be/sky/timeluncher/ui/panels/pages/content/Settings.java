@@ -18,9 +18,10 @@ import javafx.scene.text.TextAlignment;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 
-public class Settings extends ContentPanel{
+public class Settings extends ContentPanel {
     private final Saver saver = Launcher.getInstance().getSaver();
     GridPane contentPane = new GridPane();
+
     @Override
     public String getName() {
         return "settings";
@@ -78,7 +79,7 @@ public class Settings extends ContentPanel{
             comboBox.getItems().add(i/1024.0+" Go");
         }
 
-        double val = 1024;
+        int val = 1024;
         try {
             if (saver.get("maxRam") != null) {
                 val = Integer.parseInt(saver.get("maxRam"));

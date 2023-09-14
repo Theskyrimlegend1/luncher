@@ -47,7 +47,7 @@ public class TopBar extends Panel {
         this.layout.getChildren().add(imageView);
 
         // TopBar: center
-        Label title = new Label("Time Launcher");
+        Label title = new Label("JavaFx Launcher");
         title.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 18f));
         title.setStyle("-fx-text-fill: white;");
         setCenterH(title);

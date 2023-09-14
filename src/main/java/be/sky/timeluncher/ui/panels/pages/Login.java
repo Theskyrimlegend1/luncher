@@ -82,7 +82,7 @@ public class Login extends Panel {
         /*
          * Login sidebar
          */
-        Label title = new Label("Time Launcher");
+        Label title = new Label("JavaFX Launcher");
         title.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 30f));
         title.getStyleClass().add("login-title");
         setCenterH(title);
@@ -100,9 +100,7 @@ public class Login extends Panel {
         userField.setMaxWidth(300);
         userField.setTranslateY(-70d);
         userField.getStyleClass().add("login-input");
-        userField.textProperty().addListener((_a, oldValue, newValue) -> {
-             this.updateLoginBtnState(userField, userErrorLabel);
-        });
+        userField.textProperty().addListener((_a, oldValue, newValue) -> this.updateLoginBtnState(userField, userErrorLabel));
 
         // User error
         setCanTakeAllSize(userErrorLabel);
@@ -121,9 +119,7 @@ public class Login extends Panel {
         passwordField.setMaxWidth(300);
         passwordField.setTranslateY(-15d);
         passwordField.getStyleClass().add("login-input");
-        passwordField.textProperty().addListener((_a, oldValue, newValue) -> {
-             this.updateLoginBtnState(passwordField,passwordErrorLabel);
-        });
+        passwordField.textProperty().addListener((_a, oldValue, newValue) -> this.updateLoginBtnState(passwordField, passwordErrorLabel));
 
         // User error
         setCanTakeAllSize(passwordErrorLabel);
@@ -163,7 +159,6 @@ public class Login extends Panel {
             btnLogin.setDisable(!(userField.getText().length() > 0 && (offlineAuth.get() || passwordField.getText().length() > 0)));
         });
 
-
         Separator separator = new Separator();
         setCanTakeAllSize(separator);
         setCenterH(separator);
@@ -193,24 +188,25 @@ public class Login extends Panel {
         msLoginBtn.setMaxWidth(300);
         msLoginBtn.setTranslateY(165d);
         msLoginBtn.setGraphic(view);
-        msLoginBtn.setOnMouseClicked(e ->this.authenticateMS());
+        msLoginBtn.setOnMouseClicked(e -> this.authenticateMS());
 
-        loginCard.getChildren().addAll(userField, userErrorLabel, passwordField, passwordErrorLabel,authModeChk, btnLogin, separator, loginWithLabel, msLoginBtn);
+        loginCard.getChildren().addAll(userField, userErrorLabel, passwordField, passwordErrorLabel, authModeChk, btnLogin, separator, loginWithLabel, msLoginBtn);
     }
 
-    public void updateLoginBtnState(TextField textField, Label erroLabel) {
+    public void updateLoginBtnState(TextField textField, Label errorLabel) {
         if (offlineAuth.get() && textField == passwordField) return;
+
         if (textField.getText().length() == 0) {
-            erroLabel.setText("Le champ ne peut être vide");
+            errorLabel.setText("Le champ ne peut être vide");
         } else {
-            erroLabel.setText("");
+            errorLabel.setText("");
         }
 
         btnLogin.setDisable(!(userField.getText().length() > 0 && (offlineAuth.get() || passwordField.getText().length() > 0)));
     }
 
     public void authenticate(String user, String password) {
-        if(!offlineAuth.get()) {
+        if (!offlineAuth.get()) {
             Authenticator authenticator = new Authenticator(Authenticator.MOJANG_AUTH_URL, AuthPoints.NORMAL_AUTH_POINTS);
 
             try {
@@ -239,7 +235,7 @@ public class Login extends Panel {
                 alert.setContentText(e.getMessage());
                 alert.show();
             }
-        }else {
+        } else {
             AuthInfos infos = new AuthInfos(
                     userField.getText(),
                     UUID.randomUUID().toString(),
@@ -254,33 +250,33 @@ public class Login extends Panel {
             panelManager.showPanel(new App());
         }
     }
+
     public void authenticateMS() {
-        System.out.println("coucouc1");
         MicrosoftAuthenticator authenticator = new MicrosoftAuthenticator();
-        System.out.println("coucouc2");
         authenticator.loginWithAsyncWebview().whenComplete((response, error) -> {
-            System.out.println("coucouc3");
             if (error != null) {
-                System.out.println("coucouc4");
                 Launcher.getInstance().getLogger().err(error.toString());
                 Platform.runLater(()-> {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Erreur");
-                alert.setContentText(error.getMessage());
-                alert.show();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur");
+                    alert.setContentText(error.getMessage());
+                    alert.show();
                 });
+
                 return;
             }
-        saver.set("msAccessToken", response.getAccessToken());
-        saver.set("msRefreshToken", response.getRefreshToken());
-        saver.save();
-        Launcher.getInstance().setAuthInfos(new AuthInfos(
-                response.getProfile().getName(),
-                response.getAccessToken(),
-                response.getProfile().getId()
 
+            saver.set("msAccessToken", response.getAccessToken());
+            saver.set("msRefreshToken", response.getRefreshToken());
+            saver.save();
+            Launcher.getInstance().setAuthInfos(new AuthInfos(
+                    response.getProfile().getName(),
+                    response.getAccessToken(),
+                    response.getProfile().getId(),
+                    response.getXuid(),
+                    response.getClientId()
+            ));
 
-        ));
             Launcher.getInstance().getLogger().info("Hello " + response.getProfile().getName());
 
             Platform.runLater(() -> panelManager.showPanel(new App()));

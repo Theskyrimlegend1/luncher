@@ -22,34 +22,72 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
 public class Launcher extends Application {
 
     private static Launcher instance;
+
+    private static Launcher instancepix;
+
+    private final ILogger pixlogger;
     private final ILogger logger;
-    private final Path launcherDir = GameDirGenerator.createGameDir("launcher-fx", true);
+    private final Path launcherDir = GameDirGenerator.createGameDir("launcher-fx\\Holytime", true);
+    //pixelmon
+    private final Path luncherDir = GameDirGenerator.createGameDir("launcher-fx\\pixelmon", true);
     private final Saver saver;
+
+    private final Saver pixsaver;
     private PanelManager panelManager;
     private AuthInfos authInfos = null;
 
     public Launcher() {
         instance = this;
-        this.logger = new Logger("[LauncherFX]", Path.of(this.launcherDir.toString(), "launcher.log"));
-        if (!this.launcherDir.toFile().exists()) {
-            if (!this.launcherDir.toFile().mkdir()) {
+        this.logger = new Logger("[LauncherFX]", this.launcherDir.resolve("launcher.log"));
+        if (Files.notExists(this.launcherDir))
+        {
+            try
+            {
+                Files.createDirectory(this.launcherDir);
+            } catch (IOException e)
+            {
                 this.logger.err("Unable to create launcher folder");
+                this.logger.printStackTrace(e);
             }
         }
 
-        saver = new Saver(Path.of(launcherDir.toString(), "config.properties"));
+        saver = new Saver(this.launcherDir.resolve("config.properties"));
         saver.load();
+
+
+        instancepix = this;
+        this.pixlogger = new Logger("[LauncherPIX]", this.luncherDir.resolve("launcher.log"));
+        if (Files.notExists(this.luncherDir))
+        {
+            try
+            {
+                Files.createDirectory(this.luncherDir);
+            } catch (IOException e)
+            {
+                this.pixlogger.err("Unable to create launcher folder");
+                this.pixlogger.printStackTrace(e);
+            }
+        }
+
+        pixsaver = new Saver(this.launcherDir.resolve("config.properties"));
+        pixsaver.load();
     }
 
     public static Launcher getInstance() {
         return instance;
     }
+
+    public static Launcher getInstancePix(){return instancepix;}
+
+
 
     @Override
     public void start(Stage stage) {
@@ -71,7 +109,7 @@ public class Launcher extends Application {
             Authenticator authenticator = new Authenticator(Authenticator.MOJANG_AUTH_URL, AuthPoints.NORMAL_AUTH_POINTS);
 
             try {
-                RefreshResponse response  = authenticator.refresh(saver.get("accessToken"), saver.get("clientToken"));
+                RefreshResponse response = authenticator.refresh(saver.get("accessToken"), saver.get("clientToken"));
                 saver.set("accessToken", response.getAccessToken());
                 saver.set("clientToken", response.getClientToken());
                 saver.save();
@@ -99,8 +137,9 @@ public class Launcher extends Application {
                 this.setAuthInfos(new AuthInfos(
                         response.getProfile().getName(),
                         response.getAccessToken(),
-                        response.getProfile().getId()
-
+                        response.getProfile().getId(),
+                        response.getXuid(),
+                        response.getClientId()
                 ));
                 return true;
             } catch (MicrosoftAuthenticationException e) {
@@ -124,28 +163,29 @@ public class Launcher extends Application {
         this.authInfos = authInfos;
     }
 
-
     public ILogger getLogger() {
         return logger;
     }
-
-
 
     public Saver getSaver() {
         return saver;
     }
 
-    public Path getLauncherDir(){
+    public Path getLauncherDir() {
         return launcherDir;
     }
 
+    public Path getLuncherDir(){
+        return luncherDir;
+    }
+
     @Override
-    public void stop(){
+    public void stop() {
         Platform.exit();
         System.exit(0);
     }
 
-     public void hideWindow(){
+    public void hideWindow() {
         this.panelManager.getStage().hide();
-     }
+    }
 }

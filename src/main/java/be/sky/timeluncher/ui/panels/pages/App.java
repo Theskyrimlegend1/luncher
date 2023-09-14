@@ -5,9 +5,11 @@ import be.sky.timeluncher.ui.PanelManager;
 import be.sky.timeluncher.ui.panel.IPanel;
 import be.sky.timeluncher.ui.panel.Panel;
 import be.sky.timeluncher.ui.panels.pages.content.ContentPanel;
+import be.sky.timeluncher.ui.panels.pages.content.Holytime;
 import be.sky.timeluncher.ui.panels.pages.content.Home;
 import be.sky.timeluncher.ui.panels.pages.content.Settings;
 import fr.flowarg.materialdesignfontfx.MaterialDesignIcon;
+
 import fr.flowarg.materialdesignfontfx.MaterialDesignIconView;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.geometry.HPos;
@@ -28,12 +30,12 @@ public class App extends Panel {
     GridPane navContent = new GridPane();
 
     Node activeLink = null;
-
     ContentPanel currentPage = null;
 
-    Button homeBtn, settingsBtn;
+    Button homeBtn, settingsBtn, holyBtn;
 
     Saver saver = Launcher.getInstance().getSaver();
+
     @Override
     public String getName() {
         return null;
@@ -71,6 +73,7 @@ public class App extends Panel {
         bgImage.getStyleClass().add("bg-image");
         this.layout.add(bgImage, 1, 0);
 
+
         // Nav content
         this.layout.add(navContent, 1, 0);
         navContent.getStyleClass().add("nav-content");
@@ -93,85 +96,93 @@ public class App extends Panel {
         sidemenu.getChildren().add(title);
 
         // Navigation
+        holyBtn = new Button("HolyTime");
+        holyBtn.getStyleClass().add("sidemenu-nav-btn");
 
-        //home
-        homeBtn = new Button("Accueil");
+        holyBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.M.MINECRAFT));
+        setCanTakeAllSize(holyBtn);
+        setTop(holyBtn);
+        holyBtn.setTranslateY(90d);
+        holyBtn.setOnMouseClicked(e -> setPage(new Holytime(), holyBtn));
+
+        homeBtn = new Button("Pixelmon");
         homeBtn.getStyleClass().add("sidemenu-nav-btn");
-        homeBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.H.HOME));
+        homeBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.P.POKEBALL));
         setCanTakeAllSize(homeBtn);
         setTop(homeBtn);
-        homeBtn.setTranslateY(90d);
+        homeBtn.setTranslateY(130d);
         homeBtn.setOnMouseClicked(e -> setPage(new Home(), homeBtn));
-
-        //settings
 
         settingsBtn = new Button("Paramètres");
         settingsBtn.getStyleClass().add("sidemenu-nav-btn");
         settingsBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.C.COG));
         setCanTakeAllSize(settingsBtn);
         setTop(settingsBtn);
-        settingsBtn.setTranslateY(130d);
+        settingsBtn.setTranslateY(170d);
         settingsBtn.setOnMouseClicked(e -> setPage(new Settings(), settingsBtn));
 
-        sidemenu.getChildren().addAll(homeBtn, settingsBtn);
+        sidemenu.getChildren().addAll(holyBtn,homeBtn, settingsBtn);
 
-        // Pseudo + avatar
-        GridPane userPane = new GridPane();
-        setCanTakeAllWidth(userPane);
-        userPane.setMaxHeight(80);
-        userPane.setMinWidth(80);
-        userPane.getStyleClass().add("user-pane");
-        setBottom(userPane);
+        if (Launcher.getInstance().getAuthInfos() != null) {
+            // Pseudo + avatar
+            GridPane userPane = new GridPane();
+            setCanTakeAllWidth(userPane);
+            userPane.setMaxHeight(80);
+            userPane.setMinWidth(80);
+            userPane.getStyleClass().add("user-pane");
+            setBottom(userPane);
 
-        String avatarUrl = "https://minotar.net/avatar/" + (
-                saver.get("offline-username") != null ?
-                        "MHF_Steve.png" :
-                        Launcher.getInstance().getAuthInfos().getUuid() + ".png"
-        );
-        ImageView avatarView = new ImageView();
-        Image avatarImg = new Image(avatarUrl);
-        avatarView.setImage(avatarImg);
-        avatarView.setPreserveRatio(true);
-        avatarView.setFitHeight(50d);
-        setCenterV(avatarView);
-        setCanTakeAllSize(avatarView);
-        setLeft(avatarView);
-        avatarView.setTranslateX(15d);
-        userPane.getChildren().add(avatarView);
+            String avatarUrl = "https://minotar.net/avatar/" + (
+                    saver.get("offline-username") != null ?
+                            "MHF_Steve.png" :
+                            Launcher.getInstance().getAuthInfos().getUuid() + ".png"
+            );
+            ImageView avatarView = new ImageView();
+            Image avatarImg = new Image(avatarUrl);
+            avatarView.setImage(avatarImg);
+            avatarView.setPreserveRatio(true);
+            avatarView.setFitHeight(50d);
+            setCenterV(avatarView);
+            setCanTakeAllSize(avatarView);
+            setLeft(avatarView);
+            avatarView.setTranslateX(15d);
+            userPane.getChildren().add(avatarView);
 
-        Label usernameLabel = new Label(Launcher.getInstance().getAuthInfos().getUsername());
-        usernameLabel.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 25f));
-        setCanTakeAllSize(usernameLabel);
-        setCenterV(usernameLabel);
-        setLeft(usernameLabel);
-        usernameLabel.getStyleClass().add("username-label");
-        usernameLabel.setTranslateX(75d);
-        setCanTakeAllWidth(usernameLabel);
-        userPane.getChildren().add(usernameLabel);
+            Label usernameLabel = new Label(Launcher.getInstance().getAuthInfos().getUsername());
+            usernameLabel.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 25f));
+            setCanTakeAllSize(usernameLabel);
+            setCenterV(usernameLabel);
+            setLeft(usernameLabel);
+            usernameLabel.getStyleClass().add("username-label");
+            usernameLabel.setTranslateX(75d);
+            setCanTakeAllWidth(usernameLabel);
+            userPane.getChildren().add(usernameLabel);
 
-        Button logoutBtn = new Button();
-        final var logoutIcon = new MaterialDesignIconView<>(MaterialDesignIcon.L.LOGOUT);
-        logoutIcon.getStyleClass().add("logout-icon");
-        setCanTakeAllSize(logoutBtn);
-        setCenterV(logoutBtn);
-        setRight(logoutBtn);
-        logoutBtn.getStyleClass().add("logout-btn");
-        logoutBtn.setGraphic(logoutIcon);
-        logoutBtn.setOnMouseClicked(e -> {
-            if (currentPage instanceof Home && ((Home) currentPage).isDownloading()) {
-                return;
-            }
-            saver.remove("accessToken");
-            saver.remove("clientToken");
-            saver.remove("offline-username");
-            saver.save();
-            Launcher.getInstance().setAuthInfos(null);
-            this.panelManager.showPanel(new Login());
-        });
-        userPane.getChildren().add(logoutBtn);
+            Button logoutBtn = new Button();
+            final var logoutIcon = new MaterialDesignIconView<>(MaterialDesignIcon.L.LOGOUT);
+            logoutIcon.getStyleClass().add("logout-icon");
+            setCanTakeAllSize(logoutBtn);
+            setCenterV(logoutBtn);
+            setRight(logoutBtn);
+            logoutBtn.getStyleClass().add("logout-btn");
+            logoutBtn.setGraphic(logoutIcon);
+            logoutBtn.setOnMouseClicked(e -> {
+                if (currentPage instanceof Home && ((Home) currentPage).isDownloading()) {
+                    return;
+                }
+                saver.remove("accessToken");
+                saver.remove("clientToken");
+                saver.remove("offline-username");
+                saver.remove("msAccessToken");
+                saver.remove("msRefreshToken");
+                saver.save();
+                Launcher.getInstance().setAuthInfos(null);
+                this.panelManager.showPanel(new Login());
+            });
+            userPane.getChildren().add(logoutBtn);
 
-
-        sidemenu.getChildren().add(userPane);
+            sidemenu.getChildren().add(userPane);
+        }
     }
 
     @Override
@@ -181,7 +192,7 @@ public class App extends Panel {
     }
 
     public void setPage(ContentPanel panel, Node navButton) {
-        if(currentPage instanceof Home && ((Home)currentPage).isDownloading()){
+        if (currentPage instanceof Home && ((Home) currentPage).isDownloading()) {
             return;
         }
         if (activeLink != null)

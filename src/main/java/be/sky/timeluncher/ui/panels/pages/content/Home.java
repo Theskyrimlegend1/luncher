@@ -8,8 +8,6 @@ import fr.flowarg.flowupdater.download.DownloadList;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
 import fr.flowarg.flowupdater.download.json.CurseFileInfo;
-import fr.flowarg.flowupdater.download.json.Mod;
-import fr.flowarg.flowupdater.download.json.OptiFineInfo;
 import fr.flowarg.flowupdater.utils.ModFileDeleter;
 import fr.flowarg.flowupdater.versions.AbstractForgeVersion;
 import fr.flowarg.flowupdater.versions.ForgeVersionBuilder;
@@ -18,9 +16,6 @@ import fr.flowarg.materialdesignfontfx.MaterialDesignIcon;
 import fr.flowarg.materialdesignfontfx.MaterialDesignIconView;
 import fr.flowarg.openlauncherlib.NoFramework;
 import fr.theshark34.openlauncherlib.minecraft.GameFolder;
-import fr.theshark34.openlauncherlib.minecraft.GameInfos;
-import fr.theshark34.openlauncherlib.minecraft.GameTweak;
-import fr.theshark34.openlauncherlib.minecraft.GameVersion;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -30,14 +25,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class Home extends ContentPanel{
 
-    private final Saver saver = Launcher.getInstance().getSaver();
+    private final Saver saver = Launcher.getInstancePix().getSaver();
     GridPane boxPane = new GridPane();
     ProgressBar progressBar = new ProgressBar();
 
@@ -54,9 +48,14 @@ public class Home extends ContentPanel{
         return "css/content/home.css";
     }
 
+    GridPane contentPane = new GridPane();
+
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
+
+
+
 
         RowConstraints rowConstraints = new RowConstraints();
         rowConstraints.setValignment(VPos.CENTER);
@@ -87,6 +86,8 @@ public class Home extends ContentPanel{
 
         this.showPlayButton();
     }
+
+
 
     private void showPlayButton() {
         boxPane.getChildren().clear();
@@ -137,7 +138,7 @@ public class Home extends ContentPanel{
             public void onFileDownloaded(Path path) {
                 Platform.runLater(() -> {
                     String p = path.toString();
-                    fileLabel.setText("..." + p.replace(Launcher.getInstance().getLauncherDir().toFile().getAbsolutePath(), ""));
+                    fileLabel.setText("..." + p.replace(Launcher.getInstancePix().getLuncherDir().toFile().getAbsolutePath(), ""));
                 });
             }
         };
@@ -148,26 +149,26 @@ public class Home extends ContentPanel{
                     .build();
 
             List<CurseFileInfo> curseMods = CurseFileInfo.getFilesFromJson(MinecraftInfos.CURSE_MODS_LIST_URL);
-            List<Mod> mods = Mod.getModsFromJson(MinecraftInfos.MODS_LIST_URL);
+        //    List<Mod> mods = Mod.getModsFromJson(MinecraftInfos.MODS_LIST_URL);
 
             final AbstractForgeVersion forge = new ForgeVersionBuilder(MinecraftInfos.FORGE_VERSION_TYPE)
                     .withForgeVersion(MinecraftInfos.FORGE_VERSION)
                     .withCurseMods(curseMods)
-                    .withMods(mods)
+          //          .withMods(mods)
                     .withFileDeleter(new ModFileDeleter(true))
                     .build();
 
             final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder()
                     .withVanillaVersion(vanillaVersion)
                     .withModLoaderVersion(forge)
-                    .withLogger(Launcher.getInstance().getLogger())
+                    .withLogger(Launcher.getInstancePix().getLogger())
                     .withProgressCallback(callback)
                     .build();
 
-            updater.update(Launcher.getInstance().getLauncherDir());
+            updater.update(Launcher.getInstancePix().getLuncherDir());
             this.startGame(updater.getVanillaVersion().getName());
         } catch (Exception e) {
-            Launcher.getInstance().getLogger().printStackTrace(e);
+            Launcher.getInstancePix().getLogger().printStackTrace(e);
             Platform.runLater(() -> this.panelManager.getStage().show());
         }
     }
@@ -175,9 +176,10 @@ public class Home extends ContentPanel{
     public void startGame(String gameVersion) {
         try {
             NoFramework noFramework = new NoFramework(
-                    Launcher.getInstance().getLauncherDir(),
-                    Launcher.getInstance().getAuthInfos(),
+                    Launcher.getInstancePix().getLuncherDir(),
+                    Launcher.getInstancePix().getAuthInfos(),
                     GameFolder.FLOW_UPDATER
+
             );
 
             noFramework.getAdditionalVmArgs().add(this.getRamArgsFromSaver());
@@ -189,11 +191,11 @@ public class Home extends ContentPanel{
                     p.waitFor();
                     Platform.exit();
                 } catch (InterruptedException e) {
-                    Launcher.getInstance().getLogger().printStackTrace(e);
+                    Launcher.getInstancePix().getLogger().printStackTrace(e);
                 }
             });
         } catch (Exception e) {
-            Launcher.getInstance().getLogger().printStackTrace(e);
+            Launcher.getInstancePix().getLogger().printStackTrace(e);
         }
     }
 
@@ -235,9 +237,11 @@ public class Home extends ContentPanel{
         MODS("Téléchargement des mods..."),
         EXTERNAL_FILES("Téléchargement des fichier externes..."),
         POST_EXECUTIONS("Exécution post-installation..."),
-        INTEGRATION("Integration"),
-        END("Finit les amis!");
-        String details;
+        MOD_LOADER("Installation du mod loader..."),
+        INTEGRATION("Intégration des mods..."),
+        END("Fini !");
+
+        final String details;
 
         StepInfo(String details) {
             this.details = details;
