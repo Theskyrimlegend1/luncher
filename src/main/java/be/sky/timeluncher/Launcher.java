@@ -33,14 +33,21 @@ public class Launcher extends Application {
 
     private static Launcher instancepix;
 
+    private static Launcher instanceall;
+
     private final ILogger pixlogger;
     private final ILogger logger;
+
+    private final ILogger allogger;
+
     private final Path launcherDir = GameDirGenerator.createGameDir("launcher-fx\\Holytime", true);
+
+    private final Path allauncherDir = GameDirGenerator.createGameDir("launcher-fx\\AlltheMods", true);
     //pixelmon
     private final Path luncherDir = GameDirGenerator.createGameDir("launcher-fx\\pixelmon", true);
     private final Saver saver;
-
     private final Saver pixsaver;
+    private final Saver allsaver;
     private PanelManager panelManager;
     private AuthInfos authInfos = null;
 
@@ -62,6 +69,22 @@ public class Launcher extends Application {
         saver = new Saver(this.launcherDir.resolve("config.properties"));
         saver.load();
 
+        instanceall = this;
+        this.allogger = new Logger("[LauncherPIX]", this.allauncherDir.resolve("launcher.log"));
+        if (Files.notExists(this.allauncherDir))
+        {
+            try {
+                Files.createDirectory(this.allauncherDir);
+            }catch (IOException e)
+            {
+                this.allogger.err("Unable to create launcher folder");
+                this.allogger.printStackTrace(e);
+            }
+
+        }
+
+        allsaver = new Saver(this.allauncherDir.resolve("config.propertier"));
+        allsaver.load();
 
         instancepix = this;
         this.pixlogger = new Logger("[LauncherPIX]", this.luncherDir.resolve("launcher.log"));
@@ -81,9 +104,9 @@ public class Launcher extends Application {
         pixsaver.load();
     }
 
-    public static Launcher getInstance() {
-        return instance;
-    }
+    public static Launcher getInstance() {return instance;}
+
+    public static Launcher getInstanceall(){return instanceall;}
 
     public static Launcher getInstancePix(){return instancepix;}
 
@@ -112,6 +135,8 @@ public class Launcher extends Application {
                 RefreshResponse response = authenticator.refresh(saver.get("accessToken"), saver.get("clientToken"));
                 saver.set("accessToken", response.getAccessToken());
                 saver.set("clientToken", response.getClientToken());
+                saver.remove("msAccessToken"); // Supprimez les jetons MS
+                saver.remove("msRefreshToken");
                 saver.save();
                 this.setAuthInfos(new AuthInfos(
                         response.getSelectedProfile().getName(),
@@ -124,6 +149,8 @@ public class Launcher extends Application {
             } catch (AuthenticationException ignored) {
                 saver.remove("accessToken");
                 saver.remove("clientToken");
+                saver.remove("msAccessToken"); // Supprimez les jetons MS
+                saver.remove("msRefreshToken");
                 saver.save();
             }
         } else if (saver.get("msAccessToken") != null && saver.get("msRefreshToken") != null) {
@@ -133,6 +160,8 @@ public class Launcher extends Application {
 
                 saver.set("msAccessToken", response.getAccessToken());
                 saver.set("msRefreshToken", response.getRefreshToken());
+                saver.remove("accessToken"); // Supprimez les jetons d'accès
+                saver.remove("clientToken");
                 saver.save();
                 this.setAuthInfos(new AuthInfos(
                         response.getProfile().getName(),
@@ -171,12 +200,17 @@ public class Launcher extends Application {
         return saver;
     }
 
+
     public Path getLauncherDir() {
         return launcherDir;
     }
 
     public Path getLuncherDir(){
         return luncherDir;
+    }
+
+    public Path getAllauncherDir(){
+        return allauncherDir;
     }
 
     @Override

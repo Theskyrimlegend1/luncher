@@ -2,8 +2,12 @@ package be.sky.timeluncher.ui.panel;
 
 import be.sky.timeluncher.Launcher;
 import be.sky.timeluncher.ui.PanelManager;
+import be.sky.timeluncher.ui.panels.pages.App;
+import be.sky.timeluncher.ui.panels.pages.Login;
 import fr.flowarg.flowlogger.ILogger;
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -14,6 +18,8 @@ public abstract class Panel implements IPanel, IMovable, ITakePLace {
     protected final ILogger logger;
     protected GridPane layout = new GridPane();
     protected PanelManager panelManager;
+
+    protected GridPane loginCard = new GridPane();
 
     public Panel() {
         this.logger = Launcher.getInstance().getLogger();
@@ -37,7 +43,11 @@ public abstract class Panel implements IPanel, IMovable, ITakePLace {
         transition.setToValue(1);
         transition.setAutoReverse(true);
         transition.play();
+
+
     }
+
+
 
     @Override
     public abstract String getName();

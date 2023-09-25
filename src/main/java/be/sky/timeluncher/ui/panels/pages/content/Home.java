@@ -48,13 +48,10 @@ public class Home extends ContentPanel{
         return "css/content/home.css";
     }
 
-    GridPane contentPane = new GridPane();
 
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-
-
 
 
         RowConstraints rowConstraints = new RowConstraints();
@@ -62,11 +59,10 @@ public class Home extends ContentPanel{
         rowConstraints.setMinHeight(75);
         rowConstraints.setMaxHeight(75);
         this.layout.getRowConstraints().addAll(rowConstraints, new RowConstraints());
-        boxPane.getStyleClass().add("box-pane");
-        setCanTakeAllSize(boxPane);
-        boxPane.setPadding(new Insets(20));
         this.layout.add(boxPane, 0, 0);
-        this.layout.getStyleClass().add("home-layout");
+        setCanTakeAllSize(boxPane);
+        boxPane.getStyleClass().add("box-pane");
+        boxPane.setPadding(new Insets(20));
 
         progressBar.getStyleClass().add("download-progress");
         stepLabel.getStyleClass().add("download-status");
@@ -83,6 +79,8 @@ public class Home extends ContentPanel{
         fileLabel.setTranslateY(20);
         setCenterH(fileLabel);
         setCanTakeAllSize(fileLabel);
+
+
 
         this.showPlayButton();
     }
@@ -197,6 +195,7 @@ public class Home extends ContentPanel{
         } catch (Exception e) {
             Launcher.getInstancePix().getLogger().printStackTrace(e);
         }
+        System.exit(0);
     }
 
     public String getRamArgsFromSaver() {
@@ -239,6 +238,7 @@ public class Home extends ContentPanel{
         POST_EXECUTIONS("Exécution post-installation..."),
         MOD_LOADER("Installation du mod loader..."),
         INTEGRATION("Intégration des mods..."),
+        REPLACEMENT("Remplacement des mods..."),
         END("Fini !");
 
         final String details;

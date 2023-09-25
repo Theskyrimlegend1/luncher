@@ -9,8 +9,10 @@ import fr.flowarg.flowupdater.download.DownloadList;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
 import fr.flowarg.flowupdater.download.json.CurseFileInfo;
+import fr.flowarg.flowupdater.download.json.Mod;
 import fr.flowarg.flowupdater.utils.ModFileDeleter;
 import fr.flowarg.flowupdater.versions.AbstractForgeVersion;
+import fr.flowarg.flowupdater.versions.FabricVersion;
 import fr.flowarg.flowupdater.versions.ForgeVersionBuilder;
 import fr.flowarg.flowupdater.versions.VanillaVersion;
 import fr.flowarg.materialdesignfontfx.MaterialDesignIcon;
@@ -32,6 +34,8 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class Holytime extends ContentPanel{
+
+    
     private final Saver saver = Launcher.getInstance().getSaver();
     GridPane boxPane = new GridPane();
     ProgressBar progressBar = new ProgressBar();
@@ -41,21 +45,18 @@ public class Holytime extends ContentPanel{
     boolean isDownloading = false;
     @Override
     public String getName() {
-        return "home";
+        return "holytime";
     }
 
     @Override
     public String getStylesheetPath() {
-        return "css/content/home.css";
+        return "css/content/holytime.css";
     }
 
-    GridPane contentPane = new GridPane();
 
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-
-
 
 
         RowConstraints rowConstraints = new RowConstraints();
@@ -121,7 +122,7 @@ public class Holytime extends ContentPanel{
             @Override
             public void step(Step step) {
                 Platform.runLater(() -> {
-                    stepTxt = Home.StepInfo.valueOf(step.name()).getDetails();
+                    stepTxt = Holytime.StepInfo.valueOf(step.name()).getDetails();
                     setStatus(String.format("%s (%s)", stepTxt, percentTxt));
                 });
             }
@@ -150,18 +151,17 @@ public class Holytime extends ContentPanel{
                     .build();
 
             List<CurseFileInfo> curseMods = CurseFileInfo.getFilesFromJson(HolyInfos.CURSE_MODS_LIST_URL);
-            //    List<Mod> mods = Mod.getModsFromJson(MinecraftInfos.MODS_LIST_URL);
-
-            final AbstractForgeVersion forge = new ForgeVersionBuilder(HolyInfos.FORGE_VERSION_TYPE)
-                   .withForgeVersion(HolyInfos.FORGE_VERSION)
+                List<Mod> mods = Mod.getModsFromJson(HolyInfos.MODS_LIST_URL);
+            final FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
+                    .withFabricVersion("0.14.22")
                     .withCurseMods(curseMods)
-                    //          .withMods(mods)
-                    .withFileDeleter(new ModFileDeleter(true))
+                    .withMods(mods)
                     .build();
+
 
             final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder()
                     .withVanillaVersion(vanillaVersion)
-                    .withModLoaderVersion(forge)
+                    .withModLoaderVersion(fabricVersion)
                     .withLogger(Launcher.getInstance().getLogger())
                     .withProgressCallback(callback)
                     .build();
@@ -185,7 +185,7 @@ public class Holytime extends ContentPanel{
 
             noFramework.getAdditionalVmArgs().add(this.getRamArgsFromSaver());
 
-            Process p = noFramework.launch(gameVersion, HolyInfos.FORGE_VERSION.split("-")[1], NoFramework.ModLoader.FORGE);
+            Process p = noFramework.launch(gameVersion, HolyInfos.FORGE_VERSION.split("-")[1], NoFramework.ModLoader.FABRIC);
 
             Platform.runLater(() -> {
                 try {
@@ -198,6 +198,7 @@ public class Holytime extends ContentPanel{
         } catch (Exception e) {
             Launcher.getInstance().getLogger().printStackTrace(e);
         }
+        System.exit(0);
     }
 
     public String getRamArgsFromSaver() {
@@ -240,6 +241,7 @@ public class Holytime extends ContentPanel{
         POST_EXECUTIONS("Exécution post-installation..."),
         MOD_LOADER("Installation du mod loader..."),
         INTEGRATION("Intégration des mods..."),
+        REPLACEMENT("Remplacement des mods..."),
         END("Fini !");
 
         final String details;

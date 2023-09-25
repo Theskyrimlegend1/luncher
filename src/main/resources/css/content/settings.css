@@ -8,6 +8,7 @@
 
 .content-pane,  {
     -fx-background-color: transparent;
+
 }
 
 .scroll-pane .scroll-pane .viewport {

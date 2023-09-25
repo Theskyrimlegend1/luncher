@@ -78,6 +78,9 @@ public class PanelManager {
         panel.onShow();
     }
 
+
+
+
     public Stage getStage() {
         return stage;
     }

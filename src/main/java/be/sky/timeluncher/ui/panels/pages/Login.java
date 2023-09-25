@@ -8,10 +8,10 @@ import fr.litarvan.openauth.AuthenticationException;
 import fr.litarvan.openauth.Authenticator;
 import fr.litarvan.openauth.microsoft.MicrosoftAuthenticator;
 import fr.litarvan.openauth.model.AuthAgent;
-import fr.litarvan.openauth.model.AuthProfile;
 import fr.litarvan.openauth.model.response.AuthResponse;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import fr.theshark34.openlauncherlib.util.Saver;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.scene.control.*;
@@ -23,14 +23,29 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 
 public class Login extends Panel {
-    GridPane loginCard = new GridPane();
-
+    public static GridPane loginCard = new GridPane();
+    private GridPane bgImage;
+    private Timeline imageChangeTimeline; // Déclarez la variable de classe ici
     Saver saver = Launcher.getInstance().getSaver();
     AtomicBoolean offlineAuth = new AtomicBoolean(false);
 
@@ -52,11 +67,82 @@ public class Login extends Panel {
         return "css/login.css";
     }
 
+    public Login() {
+        // Initialisez vos autres variables si nécessaire
+        // ...
+
+        // Créez une liste d'URLs d'images que vous souhaitez utiliser en arrière-plan
+        List<String> imageUrls = Arrays.asList(
+                "/images/pixelmon.png",
+                "/images/holy.png",
+                "/images/allthemods.png"
+        );
+
+        AtomicInteger currentImageIndex = new AtomicInteger();
+
+        bgImage = new GridPane();
+        setCanTakeAllSize(bgImage);
+        bgImage.getStyleClass().add("bg-image");
+        this.layout.add(bgImage, 1, 0);
+
+        // Utilisation de la classe Image pour précharger la première image
+        Image firstImage = new Image(getClass().getResourceAsStream(imageUrls.get(currentImageIndex.get())));
+        bgImage.setStyle("-fx-background-image: url('" + imageUrls.get(currentImageIndex.get()) + "');");
+
+        currentImageIndex.getAndIncrement();
+
+        imageChangeTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(5), event -> {
+                    // Changez l'image de fond vers la suivante
+                    if (currentImageIndex.get() >= imageUrls.size()) {
+                        currentImageIndex.set(0); // Revenez à la première image si nous sommes arrivés à la dernière
+                    }
+
+                    // Utilisation de la classe Image pour précharger l'image suivante
+                    Image nextImage = new Image(getClass().getResourceAsStream(imageUrls.get(currentImageIndex.get())));
+
+                    // Créez un nouvel élément GridPane pour la transition
+                    GridPane transitionPane = new GridPane();
+                    setCanTakeAllSize(transitionPane);
+                    transitionPane.getStyleClass().add("bg-image");
+                    transitionPane.setStyle("-fx-background-image: url('" + imageUrls.get(currentImageIndex.get()) + "');");
+
+                    // Ajoutez le nouvel élément GridPane pour la transition
+                    this.layout.add(transitionPane, 1, 0);
+
+                    // Définissez l'opacité initiale à 0
+                    transitionPane.setOpacity(0);
+
+                    // Animation de fondu
+                    FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), transitionPane);
+                    fadeTransition.setFromValue(0);
+                    fadeTransition.setToValue(1);
+                    fadeTransition.setOnFinished(e -> {
+                        // Supprimez l'ancien élément GridPane de l'arrière-plan
+                        this.layout.getChildren().remove(bgImage);
+
+                        // Remplacez l'image de fond actuelle par la nouvelle
+                        bgImage = transitionPane;
+                        currentImageIndex.getAndIncrement();
+                        imageChangeTimeline.playFromStart();
+                    });
+                    fadeTransition.play();
+                })
+        );
+        imageChangeTimeline.setCycleCount(Timeline.INDEFINITE);
+        imageChangeTimeline.play();
+
+        // ... Le reste de votre code
+    }
+
+
     @Override
     public void init(PanelManager panelManager) {
+
         super.init(panelManager);
 
-        // Background
+
+                // Background
         this.layout.getStyleClass().add("login-layout");
 
         ColumnConstraints columnConstraints = new ColumnConstraints();
@@ -66,23 +152,21 @@ public class Login extends Panel {
         this.layout.getColumnConstraints().addAll(columnConstraints, new ColumnConstraints());
         this.layout.add(loginCard, 0, 0);
 
-        // Background image
-        GridPane bgImage = new GridPane();
-        setCanTakeAllSize(bgImage);
-        bgImage.getStyleClass().add("bg-image");
-        this.layout.add(bgImage, 1, 0);
+
+
+
 
         // Login card
         setCanTakeAllSize(this.layout);
         loginCard.getStyleClass().add("login-card");
+        loginCard.setStyle("-fx-background-image: url('/images/stars.png');");
         setLeft(loginCard);
         setCenterH(loginCard);
         setCenterV(loginCard);
-
         /*
          * Login sidebar
          */
-        Label title = new Label("JavaFX Launcher");
+        Label title = new Label("Time Launcher");
         title.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 30f));
         title.getStyleClass().add("login-title");
         setCenterH(title);
@@ -206,7 +290,51 @@ public class Login extends Panel {
     }
 
     public void authenticate(String user, String password) {
-        if (!offlineAuth.get()) {
+        if (offlineAuth.get()) {
+            String storedUsername = "";
+            String storedPassword = "";
+
+            try {
+                // Télécharger le fichier JSON depuis l'URL
+                URL url = new URL("https://votre-hebergeur.com/chemin/vers/credentials.json");
+                InputStream inputStream = url.openStream();
+                InputStreamReader reader = new InputStreamReader(inputStream);
+
+                // Lire le fichier JSON et extraire les données de connexion
+                JSONObject jsonObject = (JSONObject) new JSONParser().parse(reader);
+                storedUsername = (String) jsonObject.get("username");
+                storedPassword = (String) jsonObject.get("password");
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+
+            if (!storedUsername.isEmpty() && user.equals(storedUsername) && password.equals(storedPassword)) {
+                // Authentification réussie en mode "crack"
+
+                AuthInfos infos = new AuthInfos(
+                        user,
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString()
+                );
+
+                saver.set("offline-username", infos.getUsername());
+                saver.save();
+                Launcher.getInstance().setAuthInfos(infos);
+
+                this.logger.info("Hello " + infos.getUsername());
+
+                panelManager.showPanel(new App());
+            } else {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur");
+                    alert.setHeaderText("Authentification échouée");
+                    alert.setContentText("Nom d'utilisateur ou mot de passe incorrect.");
+                    alert.showAndWait();
+                });
+            }
+
+        } else {
             Authenticator authenticator = new Authenticator(Authenticator.MOJANG_AUTH_URL, AuthPoints.NORMAL_AUTH_POINTS);
 
             try {
@@ -229,28 +357,16 @@ public class Login extends Panel {
 
                 panelManager.showPanel(new App());
             } catch (AuthenticationException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Erreur");
-                alert.setHeaderText("Une erreur est survenu lors de la connexion");
-                alert.setContentText(e.getMessage());
-                alert.show();
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur");
+                    alert.setHeaderText("Une erreur est survenue lors de la connexion.");
+                    alert.setContentText(e.getMessage());
+                    alert.showAndWait();
+                });
             }
-        } else {
-            AuthInfos infos = new AuthInfos(
-                    userField.getText(),
-                    UUID.randomUUID().toString(),
-                    UUID.randomUUID().toString()
-            );
-            saver.set("offline-username", infos.getUsername());
-            saver.save();
-            Launcher.getInstance().setAuthInfos(infos);
-
-            this.logger.info("Hello " + infos.getUsername());
-
-            panelManager.showPanel(new App());
         }
     }
-
     public void authenticateMS() {
         MicrosoftAuthenticator authenticator = new MicrosoftAuthenticator();
         authenticator.loginWithAsyncWebview().whenComplete((response, error) -> {

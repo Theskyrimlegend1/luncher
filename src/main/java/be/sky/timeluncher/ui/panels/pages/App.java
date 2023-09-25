@@ -4,35 +4,35 @@ import be.sky.timeluncher.Launcher;
 import be.sky.timeluncher.ui.PanelManager;
 import be.sky.timeluncher.ui.panel.IPanel;
 import be.sky.timeluncher.ui.panel.Panel;
-import be.sky.timeluncher.ui.panels.pages.content.ContentPanel;
-import be.sky.timeluncher.ui.panels.pages.content.Holytime;
-import be.sky.timeluncher.ui.panels.pages.content.Home;
-import be.sky.timeluncher.ui.panels.pages.content.Settings;
+import be.sky.timeluncher.ui.panels.pages.content.*;
 import fr.flowarg.materialdesignfontfx.MaterialDesignIcon;
 
 import fr.flowarg.materialdesignfontfx.MaterialDesignIconView;
 import fr.theshark34.openlauncherlib.util.Saver;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
-
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 public class App extends Panel {
     GridPane sidemenu = new GridPane();
     GridPane navContent = new GridPane();
 
+    private BackgroundImage backgroundImage;
     Node activeLink = null;
     ContentPanel currentPage = null;
 
-    Button homeBtn, settingsBtn, holyBtn;
+    Button homeBtn, settingsBtn, holyBtn,alltheBtn;
 
     Saver saver = Launcher.getInstance().getSaver();
 
@@ -73,10 +73,8 @@ public class App extends Panel {
         bgImage.getStyleClass().add("bg-image");
         this.layout.add(bgImage, 1, 0);
 
-
         // Nav content
         this.layout.add(navContent, 1, 0);
-        navContent.getStyleClass().add("nav-content");
         setLeft(navContent);
         setCenterH(navContent);
         setCenterV(navContent);
@@ -85,7 +83,7 @@ public class App extends Panel {
          * Side menu
          */
         // Titre
-        Label title = new Label("JavaFX Launcher");
+        Label title = new Label("Time Launcher");
         title.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 30f));
         title.getStyleClass().add("home-title");
         setCenterH(title);
@@ -98,8 +96,9 @@ public class App extends Panel {
         // Navigation
         holyBtn = new Button("HolyTime");
         holyBtn.getStyleClass().add("sidemenu-nav-btn");
-
-        holyBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.M.MINECRAFT));
+        MaterialDesignIconView<MaterialDesignIcon.M> iconView = new MaterialDesignIconView<>(MaterialDesignIcon.M.MINECRAFT);
+        iconView.getStyleClass().add("material-design-icon-view");
+        holyBtn.setGraphic(iconView);
         setCanTakeAllSize(holyBtn);
         setTop(holyBtn);
         holyBtn.setTranslateY(90d);
@@ -107,21 +106,35 @@ public class App extends Panel {
 
         homeBtn = new Button("Pixelmon");
         homeBtn.getStyleClass().add("sidemenu-nav-btn");
-        homeBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.P.POKEBALL));
+        MaterialDesignIconView<MaterialDesignIcon.P> iconViews = new MaterialDesignIconView<>(MaterialDesignIcon.P.POKEBALL);
+        iconViews.getStyleClass().add("material-design-icon-view");
+        homeBtn.setGraphic(iconViews);
         setCanTakeAllSize(homeBtn);
         setTop(homeBtn);
         homeBtn.setTranslateY(130d);
         homeBtn.setOnMouseClicked(e -> setPage(new Home(), homeBtn));
 
+        alltheBtn = new Button("All the mods");
+        alltheBtn.getStyleClass().add("sidemenu-nav-btn");
+        MaterialDesignIconView<MaterialDesignIcon.T> iconAlls = new MaterialDesignIconView<>(MaterialDesignIcon.T.TURBINE);
+        iconAlls.getStyleClass().add("material-design-icon-view");
+        alltheBtn.setGraphic(iconAlls);
+        setCanTakeAllSize(alltheBtn);
+        setTop(alltheBtn);
+        alltheBtn.setTranslateY(170d);
+        alltheBtn.setOnMouseClicked(e -> setPage(new All(), alltheBtn));
+
         settingsBtn = new Button("Paramètres");
         settingsBtn.getStyleClass().add("sidemenu-nav-btn");
-        settingsBtn.setGraphic(new MaterialDesignIconView<>(MaterialDesignIcon.C.COG));
+        MaterialDesignIconView<MaterialDesignIcon.C> iconViewss = new MaterialDesignIconView<>(MaterialDesignIcon.C.COG);
+        iconViewss.getStyleClass().add("material-design-icon-view");
+        settingsBtn.setGraphic(iconViewss);
         setCanTakeAllSize(settingsBtn);
         setTop(settingsBtn);
-        settingsBtn.setTranslateY(170d);
+        settingsBtn.setTranslateY(210d);
         settingsBtn.setOnMouseClicked(e -> setPage(new Settings(), settingsBtn));
 
-        sidemenu.getChildren().addAll(holyBtn,homeBtn, settingsBtn);
+        sidemenu.getChildren().addAll(holyBtn,homeBtn,alltheBtn, settingsBtn);
 
         if (Launcher.getInstance().getAuthInfos() != null) {
             // Pseudo + avatar
@@ -191,17 +204,24 @@ public class App extends Panel {
         setPage(new Home(), homeBtn);
     }
 
+
+
     public void setPage(ContentPanel panel, Node navButton) {
+
         if (currentPage instanceof Home && ((Home) currentPage).isDownloading()) {
             return;
-        }
-        if (activeLink != null)
+        } else if (currentPage instanceof Holytime && ((Holytime) currentPage).isDownloading()) {
+            return;
+        }else if (currentPage instanceof All && ((All) currentPage).isDownloading()){
+            return;
+        }if (activeLink != null)
             activeLink.getStyleClass().remove("active");
         activeLink = navButton;
         activeLink.getStyleClass().add("active");
 
         this.navContent.getChildren().clear();
         if (panel != null) {
+
             this.navContent.getChildren().add(panel.getLayout());
             currentPage = panel;
             if (panel.getStylesheetPath() != null) {
@@ -215,4 +235,8 @@ public class App extends Panel {
             panel.onShow();
         }
     }
-}
+
+
+
+
+    }

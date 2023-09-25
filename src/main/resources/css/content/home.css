@@ -2,6 +2,20 @@
     -fx-background-color: #eee;
 }
 
+
+.content-pane,  {
+    -fx-background-color: transparent;
+}
+
+.bg-image {
+    -fx-background-image: url("/images/pixelmonhome.png");
+    -fx-background-position: center center;
+    -fx-background-repeat: stretch;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}
+
 .play-btn {
     -fx-background-radius: 10px;
     -fx-font-size: 16px;

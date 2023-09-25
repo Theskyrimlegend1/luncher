@@ -40,14 +40,14 @@ public class TopBar extends Panel {
          */
         // TopBar: left side
         ImageView imageView = new ImageView();
-        imageView.setImage(new Image("images/icon.png"));
+        imageView.setImage(new Image("images/icons.png"));
         imageView.setPreserveRatio(true);
         imageView.setFitHeight(25);
         setLeft(imageView);
         this.layout.getChildren().add(imageView);
 
         // TopBar: center
-        Label title = new Label("JavaFx Launcher");
+        Label title = new Label("Time Launcher");
         title.setFont(Font.font("Consolas", FontWeight.BOLD, FontPosture.REGULAR, 18f));
         title.setStyle("-fx-text-fill: white;");
         setCenterH(title);
